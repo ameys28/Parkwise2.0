@@ -32,11 +32,59 @@ export const recordParkingEvent = async ({ numberPlate, action, notes }, userId)
     let session = null;
 
     if (action === 'Entry') {
+      // Check for active booking
+      const activeBooking = await tx.booking.findFirst({
+        where: {
+          vehicleId: vehicle.id,
+          status: 'BOOKED',
+        },
+      });
+
+      let slotId = null;
+      let bookingId = null;
+
+      if (activeBooking) {
+        slotId = activeBooking.slotId;
+        bookingId = activeBooking.id;
+
+        // Update booking status to COMPLETED
+        await tx.booking.update({
+          where: { id: activeBooking.id },
+          data: { status: 'COMPLETED' },
+        });
+
+        // Update slot status to OCCUPIED
+        await tx.parkingSlot.update({
+          where: { id: activeBooking.slotId },
+          data: { status: 'OCCUPIED' },
+        });
+      } else {
+        // Find first available slot
+        const availableSlot = await tx.parkingSlot.findFirst({
+          where: { status: 'AVAILABLE', isActive: true },
+          orderBy: { slotNumber: 'asc' },
+        });
+
+        if (!availableSlot) {
+          throw new ApiError(409, 'No available parking slots');
+        }
+
+        slotId = availableSlot.id;
+
+        // Update slot status to OCCUPIED
+        await tx.parkingSlot.update({
+          where: { id: availableSlot.id },
+          data: { status: 'OCCUPIED' },
+        });
+      }
+
       session = await tx.parkingSession.create({
         data: {
           vehicleId: vehicle.id,
           actorId: userId || null,
           status: 'ACTIVE',
+          slotId,
+          bookingId,
         },
       });
     } else {
@@ -53,6 +101,14 @@ export const recordParkingEvent = async ({ numberPlate, action, notes }, userId)
             exitTime: new Date(),
           },
         });
+
+        if (session.slotId) {
+          // Free up the slot
+          await tx.parkingSlot.update({
+            where: { id: session.slotId },
+            data: { status: 'AVAILABLE' },
+          });
+        }
       }
     }
 
@@ -65,7 +121,11 @@ export const recordParkingEvent = async ({ numberPlate, action, notes }, userId)
       },
       include: {
         vehicle: true,
-        session: true,
+        session: {
+          include: {
+            slot: true,
+          },
+        },
       },
     });
 

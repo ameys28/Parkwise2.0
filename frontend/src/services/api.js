@@ -96,9 +96,12 @@ export const getOccupancy = async () => {
 };
 
 export const getSlots = async () => request('get', '/slots');
+export const patchSlot = async (slotId, payload) => request('patch', `/slots/${slotId}`, payload);
 export const createBooking = async (booking) => request('post', '/bookings', booking);
 export const getBookings = async (params = {}) => {
   const search = new URLSearchParams(params).toString();
   return request('get', `/bookings${search ? `?${search}` : ''}`);
 };
+export const cancelBooking = async (bookingId) => request('delete', `/bookings/${bookingId}`);
 export const registerAuth = async (payload) => request('post', '/auth/register', payload);
+export const deleteVehicle = async (vehicleId) => request('delete', `/vehicles/${vehicleId}`);

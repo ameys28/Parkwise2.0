@@ -6,27 +6,21 @@ export const AuthContext = createContext();
 const STORAGE_KEY = 'parkwise.auth';
 
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState({
-    isAuthenticated: false,
-    user: null,
-  });
-
-  useEffect(() => {
+  const [auth, setAuth] = useState(() => {
     const storedAuth = window.localStorage.getItem(STORAGE_KEY);
-    if (!storedAuth) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(storedAuth);
-      if (parsed?.token && parsed?.user) {
-        setAuthToken(parsed.token);
-        setAuth({ isAuthenticated: true, user: parsed.user });
+    if (storedAuth) {
+      try {
+        const parsed = JSON.parse(storedAuth);
+        if (parsed?.token && parsed?.user) {
+          setAuthToken(parsed.token);
+          return { isAuthenticated: true, user: parsed.user };
+        }
+      } catch {
+        window.localStorage.removeItem(STORAGE_KEY);
       }
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
     }
-  }, []);
+    return { isAuthenticated: false, user: null };
+  });
 
   const login = async (username, password) => {
     try {

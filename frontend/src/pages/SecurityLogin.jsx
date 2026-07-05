@@ -33,10 +33,10 @@ const SecurityLogin = ({ isOpen, onClose }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-2xl font-bold text-center mb-6">Security Login</h2>
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+      <h2 className="text-2xl font-bold text-center text-slate-900 mb-6">Security Login</h2>
+      {error && <p className="text-red-500 text-center mb-4 font-semibold text-sm">{error}</p>}
       <input
-        className="w-full p-3 mb-4 border rounded"
+        className="w-full p-3 mb-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 shadow-sm"
         type="text"
         placeholder="Username"
         value={username}
@@ -44,7 +44,7 @@ const SecurityLogin = ({ isOpen, onClose }) => {
         aria-label="Username"
       />
       <input
-        className="w-full p-3 mb-4 border rounded"
+        className="w-full p-3 mb-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 shadow-sm"
         type="password"
         placeholder="Password"
         value={password}
@@ -52,7 +52,7 @@ const SecurityLogin = ({ isOpen, onClose }) => {
         aria-label="Password"
       />
       <button
-        className="w-full bg-green-500 text-white py-3 rounded hover:bg-green-600 transition disabled:opacity-50"
+        className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-500 transition shadow-md shadow-indigo-600/10 font-bold disabled:opacity-50 active:scale-95"
         onClick={handleLogin}
         disabled={loading}
       >

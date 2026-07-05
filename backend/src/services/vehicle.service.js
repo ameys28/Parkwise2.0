@@ -38,3 +38,16 @@ export const createVehicle = async ({ numberPlate, ownerId, guest }, user) => {
 
   return vehicle;
 };
+
+export const deleteVehicle = async (vehicleId, user) => {
+  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
+  if (!vehicle) {
+    throw new ApiError(404, 'Vehicle not found');
+  }
+
+  if (user.role !== 'ADMIN' && vehicle.ownerId !== user.id) {
+    throw new ApiError(403, 'You cannot delete this vehicle');
+  }
+
+  return prisma.vehicle.delete({ where: { id: vehicleId } });
+};
